@@ -6,6 +6,9 @@ import React, { Component } from 'react'
 // Import jQuery
 import $ from 'jquery'
 
+// Import reCaptcha
+import Recaptcha from 'react-recaptcha'
+
 // Import some simple styles for contact form
 //import './styles/styles.css'
 
@@ -17,9 +20,9 @@ export default class ContactPage extends Component {
     inputCheckDev: false,
     inputMessage: '',
     inputName: '',
+    isCaptchaValid: false,
     isErrorShown: false,
     isFormValid: false
-
   }
 
   // Handle visitor's interaction with inputs
@@ -51,9 +54,17 @@ export default class ContactPage extends Component {
     })
   }
 
+  // Show message in console when reCaptcha plugin is loaded
+  onCaptchaLoad = () => {
+    console.log('Captcha loaded')
+  }
 
-
-
+  // Update state after reCaptcha validates visitor
+  onCaptchaVerify = (response) => {
+    this.setState({
+      isCaptchaValid: true
+    })
+  }
 
   handleFormSubmit = event => {
     event.preventDefault()
@@ -71,7 +82,7 @@ export default class ContactPage extends Component {
         type: 'POST',
         url: '/mailer.php',
         success: function(data) {
-        console.info(data)
+          console.info(data)
         },
         error: function(xhr, status, err) {
           console.error(status, err.toString())
@@ -86,7 +97,7 @@ export default class ContactPage extends Component {
         inputCheckDev: false,
         inputMessage: '',
         inputName: '',
-
+        isCaptchaValid: false,
         isErrorShown: false,
         isFormValid: false
       })
@@ -156,7 +167,17 @@ export default class ContactPage extends Component {
             <textarea onChange={this.handleInput} name="inputMessage" id="inputMessage" required={true} />
           </fieldset>
 
-
+          {/* !! */}
+          {/* Make sure to use your 'sitekey' for Google reCaptcha API! */}
+          {/* !! */}
+          <fieldset>
+            <Recaptcha
+              onloadCallback={this.onCaptchaLoad}
+              sitekey="6LfIrOEZAAAAACGjlC7zkO-lipcxbaRFecn-mlx5"
+              render="explicit"
+              verifyCallback={this.onCaptchaVerify}
+            />
+          </fieldset>
 
           {this.state.isFormSubmitted && (
             <fieldset>
@@ -166,7 +187,7 @@ export default class ContactPage extends Component {
 
           {this.state.isErrorShown && (
             <fieldset>
-               <p>Please, make sure to fill all fields.</p>
+              <p>Please, make sure to fill all fields.</p>
             </fieldset>
           )}
 
